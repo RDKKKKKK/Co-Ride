@@ -1,0 +1,36 @@
+coride:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: 192.168.168.130
+    port: 3306
+    database: team_carpool_app
+    username: root
+    password: 123456
+
+  alioss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    access-key-id: LTAI5tNKfWezmdM9FSR8oHcH
+    access-key-secret: pv5elRC1qAyTrrYr3RC6PSjCD2vnIa
+    bucket-name: sky-test-0
+
+  redis:
+    host: 192.168.168.130
+    port: 6379
+    password: 123456
+    database: 10
+    lettuce:
+      pool:
+        max-active: 8
+        min-idle: 0
+        max-idle: 8
+        max-wait: 100
+
+  rabbitmq:
+    host: 192.168.168.130
+
+
+
+
+
+
+

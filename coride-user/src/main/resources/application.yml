@@ -1,0 +1,84 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: local
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${coride.datasource.driver-class-name}
+      url: jdbc:mysql://${coride.datasource.host}:${coride.datasource.port}/${coride.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${coride.datasource.username}
+      password: ${coride.datasource.password}
+  redis:
+    host: ${coride.redis.host}
+    port: ${coride.redis.port}
+    password: ${coride.redis.password}
+    database: ${coride.redis.database}
+    lettuce:
+      pool:
+        max-active: ${coride.redis.lettuce.pool.max-active}
+        min-idle: ${coride.redis.lettuce.pool.min-idle}
+        max-idle: ${coride.redis.lettuce.pool.max-idle}
+        max-wait: ${coride.redis.lettuce.pool.max-wait}
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.168.130:8848
+        service: coride-user
+
+  rabbitmq:
+    host: ${coride.rabbitmq.host}
+    port: 5672
+    virtual-host: /
+    username: guest
+    password: guest
+
+  mail:
+    host: smtp.163.com
+    username: rdk1606@163.com
+    password: UAAHSMYULMXQDMWC
+    default-encoding: UTF-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true # 启用SMTP认证
+          starttls:
+            enabled: true # 启用SMTP认证
+            required: true # 必须采用加密链接
+
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.carpool.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      coride:
+        mapper: debug
+        service: info
+        controller: info
+
+coride:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: coride
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+
+  alioss:
+    endpoint: ${coride.alioss.endpoint}
+    access-key-id: ${coride.alioss.access-key-id}
+    access-key-secret: ${coride.alioss.access-key-secret}
+    bucket-name: ${coride.alioss.bucket-name}
+
