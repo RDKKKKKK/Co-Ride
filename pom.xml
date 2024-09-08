@@ -20,8 +20,8 @@
         <module>coride-user</module>
         <module>coride-ride</module>
         <module>coride-notification</module>
-
-        <module>coride-pojo</module>
+        <module>coride-api</module>
+        <module>coride-gateway</module>
     </modules>
 
     <properties>

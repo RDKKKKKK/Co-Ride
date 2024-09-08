@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8081
 
 spring:
   profiles:
@@ -28,14 +28,14 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.168.130:8848
-        service: user-service
+        service: notification-service
 
   rabbitmq:
     host: ${coride.rabbitmq.host}
     port: 5672
     virtual-host: /
-    username: guest
-    password: guest
+    username: root
+    password: 123456
 
   mail:
     host: smtp.163.com
@@ -75,15 +75,8 @@ coride:
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
-    excludedPath:
-      - /user/login
-      - /user/register
-      - /user/email
-      - /request
 
-  alioss:
-    endpoint: ${coride.alioss.endpoint}
-    access-key-id: ${coride.alioss.access-key-id}
-    access-key-secret: ${coride.alioss.access-key-secret}
-    bucket-name: ${coride.alioss.bucket-name}
+springfox:
+  documentation:
+    enabled: false
 

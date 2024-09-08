@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/coride-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/coride-common/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/coride-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/coride-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/coride-gateway/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/coride-notification/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/coride-pojo/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/coride-ride/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/coride-user/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

@@ -1,0 +1,39 @@
+server:
+  port: 8085
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.168.130:8848
+    gateway:
+      routes:
+        - id: user # 路由规则id，自定义，唯一
+          uri: lb://user-service # 路由的目标服务，lb代表负载均衡，会从注册中心拉取服务列表
+          predicates: # 路由断言，判断当前请求是否符合当前规则，符合则路由到目标服务
+            - Path=/user/**,**/common/** # 这里是以请求路径作为判断规则
+        - id: ride
+          uri: lb://ride-service
+          predicates:
+            - Path=**/ride/**
+        - id: notification
+          uri: lb://notification-service
+          predicates:
+            - Path=/request/**
+          filters:
+            - StripPrefix=1
+
+
+coride:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: coride
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    excludedPath:
+      - /user/login
+      - /user/register
+      - /user/email
+      - /request/ws

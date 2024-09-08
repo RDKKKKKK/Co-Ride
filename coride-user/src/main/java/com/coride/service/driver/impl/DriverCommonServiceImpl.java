@@ -1,5 +1,6 @@
 package com.coride.service.driver.impl;
 
+import com.coride.client.RideClient;
 import com.coride.dto.DriverRecordDTO;
 import com.coride.dto.DriverRecordDetailDTO;
 import com.coride.dto.UserAccountDTO;
@@ -29,6 +30,9 @@ public class DriverCommonServiceImpl implements DriverCommonService {
     @Autowired
     private CarpoolerMapper carpoolerMapper;
 
+    @Autowired
+    private RideClient rideClient;
+
     @Override
     public UserAccountDTO getDriverAccount(Long id) {
         Driver driver = driverMapper.getDriverAccountById(id);
@@ -40,25 +44,14 @@ public class DriverCommonServiceImpl implements DriverCommonService {
 
     @Override
     public List<DriverRecordDTO> getDriverRecord(Long id) {
-        List<CarpoolGroup> carpoolGroups = driverMapper.getDriverRecordById(id);
+
+        List<CarpoolGroup> carpoolGroups = rideClient.getCarpoolGroupByDriverId(id);
+        //List<CarpoolGroup> carpoolGroups = driverMapper.getDriverRecordById(id);
+
         ArrayList<DriverRecordDTO> driverRecordDTOS = new ArrayList<>();
 
         for (CarpoolGroup carpoolGroup : carpoolGroups){
-            DriverRecordDTO driverRecordDTO = new DriverRecordDTO();
-
-            driverRecordDTO.setPlateNo(carpoolGroup.getPlateNo());
-            driverRecordDTO.setDepartureTime(carpoolGroup.getDepartureTime());
-            driverRecordDTO.setStatus(carpoolGroup.getStatus());
-
-            Vehicle vehicle = driverMapper.getVehiclesByPlateNo(carpoolGroup.getPlateNo());
-            driverRecordDTO.setCarName(vehicle.getName());
-
-            List<String> names = driverMapper.getPassengerNamesByCarpoolGroupId(carpoolGroup.getIdCarpoolGroup());
-            driverRecordDTO.setCarpoolers(names);
-
-            driverRecordDTO.setOrigin(carpoolGroup.getOriginName());
-            driverRecordDTO.setDestination(carpoolGroup.getDestinationName());
-
+            DriverRecordDTO driverRecordDTO = rideClient.getDriverRecord(carpoolGroup);
             driverRecordDTOS.add(driverRecordDTO);
         }
 
@@ -76,10 +69,10 @@ public class DriverCommonServiceImpl implements DriverCommonService {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date time = dateFormat.parse(departureTime);
-        Long carpoolGroupId = driverMapper.getGroupIdByDriverId(id, time);
 
-        ArrayList<DriverRecordDetailDTO> passengerDetailsByCarpoolGroupId = driverMapper.getPassengerDetailsByCarpoolGroupId(carpoolGroupId);
-        return passengerDetailsByCarpoolGroupId;
+        List<DriverRecordDetailDTO> passengerDetailsByCarpoolGroupId = rideClient.getRecordDetail(id, time);
+
+         return passengerDetailsByCarpoolGroupId;
     }
 
 }

@@ -4,8 +4,10 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-@ConfigurationProperties(prefix = "sky.jwt")
+@ConfigurationProperties(prefix = "coride.jwt")
 @Data
 public class JwtProperties {
 
@@ -15,6 +17,8 @@ public class JwtProperties {
     private String adminSecretKey;
     private long adminTtl;
     private String adminTokenName;
+    private List<String> excludedPath;
+
 
     /**
      * 用户端微信用户生成jwt令牌相关配置
@@ -22,5 +26,6 @@ public class JwtProperties {
     private String userSecretKey;
     private long userTtl;
     private String userTokenName;
+
 
 }

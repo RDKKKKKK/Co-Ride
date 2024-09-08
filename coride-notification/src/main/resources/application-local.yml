@@ -3,7 +3,7 @@ coride:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: 192.168.168.130
     port: 3306
-    database: coride_app
+    database: team_carpool_app
     username: root
     password: 123456
 

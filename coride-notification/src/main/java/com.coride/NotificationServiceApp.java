@@ -8,13 +8,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = "com.coride.client")
 @EnableTransactionManagement //开启注解方式的事务管理
 @Slf4j
 @EnableScheduling
-public class UserServiceApp {
+@EnableFeignClients
+public class NotificationServiceApp {
     public static void main(String[] args) {
-        SpringApplication.run(UserServiceApp.class, args);
+        SpringApplication.run(NotificationServiceApp.class, args);
         log.info("User service server started");
     }
 }

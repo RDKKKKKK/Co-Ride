@@ -1,5 +1,6 @@
 package com.coride.service.carpooler.impl;
 
+import com.coride.client.RideClient;
 import com.coride.dto.CarpoolerRecordDTO;
 import com.coride.dto.UserAccountDTO;
 import com.coride.entity.CarpoolRequest;
@@ -18,6 +19,10 @@ public class CarpoolerCommonServiceImpl implements CarpoolerCommonService {
 
     @Autowired
     private CarpoolerMapper carpoolerMapper;
+
+    @Autowired
+    private RideClient rideClient;
+
     @Override
     public UserAccountDTO getCarpoolerAccount(Long id) {
         Carpooler carpooler = carpoolerMapper.getCarpoolerAccountById(id);
@@ -31,7 +36,9 @@ public class CarpoolerCommonServiceImpl implements CarpoolerCommonService {
 
     @Override
     public List<CarpoolerRecordDTO> getCarpoolerRecord(Long id) {
-        List<CarpoolRequest> records = carpoolerMapper.getCarpoolerRecordsById(id);
+
+        List<CarpoolRequest> records = rideClient.getCarpoolerRecord(id);
+        //List<CarpoolRequest> records = carpoolerMapper.getCarpoolerRecordsById(id);
         ArrayList<CarpoolerRecordDTO> carpoolerRecordDTOS = new ArrayList<>();
 
         for (CarpoolRequest record : records){
@@ -42,7 +49,8 @@ public class CarpoolerCommonServiceImpl implements CarpoolerCommonService {
             carpoolerRecordDTO.setDestination(record.getDestinationName());
             carpoolerRecordDTO.setStatus(record.getStatus());
 
-            carpoolerRecordDTO.setDriverName(carpoolerMapper.getDriverNameByCarpoolGroupId(record.getIdCarpoolRequest()));
+            carpoolerRecordDTO.setDriverName(rideClient.getCarpoolDriverByGroupId(record.getIdCarpoolRequest()));
+            //carpoolerRecordDTO.setDriverName(carpoolerMapper.getDriverNameByCarpoolGroupId(record.getIdCarpoolRequest()));
             carpoolerRecordDTOS.add(carpoolerRecordDTO);
         }
 

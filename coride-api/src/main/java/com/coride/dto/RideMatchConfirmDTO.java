@@ -1,6 +1,7 @@
 package com.coride.dto;
 
 import com.coride.entity.Driver;
+import com.coride.entity.Vehicle;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,10 @@ public class RideMatchConfirmDTO implements Serializable {
     private String matchId;
 
     private String carpoolerName;
+
+    private String originName;
+
+    private String destinationName;
+
+    private Vehicle vehicle;
 }
