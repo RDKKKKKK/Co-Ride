@@ -1,6 +1,8 @@
 package com.coride.message;
 
 import com.alibaba.fastjson.JSONObject;
+import com.coride.abstraction.ConfirmMessage;
+import com.coride.abstraction.ResultMessage;
 import com.coride.dto.CarpoolerInfoDTO;
 import com.coride.dto.DriverInfoDTO;
 import com.coride.dto.RideMatchConfirmDTO;
@@ -14,10 +16,11 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
+
+import java.io.IOException;
 
 import static com.coride.RideWebSocketServer.sessionMap;
 
@@ -31,33 +34,14 @@ public class NotificationService {
             exchange = @Exchange(name = "ride2NotificationExchange", type = ExchangeTypes.TOPIC),
             key = "notification.confirm"
     ))
-    public void processMatchConfirmNotification(RideMatchConfirmDTO rideMatchConfirmDTO) throws JsonProcessingException {
+    public void processMatchConfirmNotification(RideMatchConfirmDTO rideMatchConfirmDTO) throws IOException {
         // 处理匹配确认通知逻辑
-        String id;
-
-
-        //Driver Message
-        /*
-        List<Long> passengersIds = rideMatchConfirmDTO.getCarpoolGroup().getPassengersIds();
-        List<String> wayPoints = new ArrayList<>();
-
-        for (Long passengerId : passengersIds){
-            wayPoints.add(carpoolerMapper.getOriginById(passengerId));
-            wayPoints.add(carpoolerMapper.getDestinationById(passengerId));
+        ConfirmMessage confirmMessage = new ConfirmMessage(rideMatchConfirmDTO);
+        confirmMessage.processMessage();
         }
 
-        //TODO
-        String wayPointString;
-        for (String wayPoint : wayPoints){
-            wayPoint += "|";
-        }*/
-
-        /**
-         * parameters needed for ntf
-         * driver: origin & destination_name + passenger_name + matchId
-         * carpooler: plateNo + driver_name + car_type + seat_pax + matchId
-         */
-
+        /*
+        String id;
 
         if (rideMatchConfirmDTO.getRoleType().equals("Driver")) {
             id = "D" + rideMatchConfirmDTO.getDriverId();
@@ -100,10 +84,7 @@ public class NotificationService {
             Session session = sessionMap.get(id);
             if (session == null) return;
             session.getAsyncRemote().sendText(message);
-            log.info("Confirmation sent to carpooler");
-        }
-
-    }
+            log.info("Confirmation sent to carpooler");*/
 
     // 监听匹配结果通知
     @RabbitListener(bindings = @QueueBinding(
@@ -111,8 +92,14 @@ public class NotificationService {
             exchange = @Exchange(name = "ride2NotificationExchange", type = ExchangeTypes.TOPIC),
             key = "notification.result"
     ))
-    public void processMatchResultNotification(RideMatchResultDTO rideMatchResultDTO) {
-        // 处理匹配结果通知逻辑
+    public void processMatchResultNotification(RideMatchResultDTO rideMatchResultDTO) throws IOException {
+        ResultMessage resultMessage = new ResultMessage(rideMatchResultDTO);
+        resultMessage.processMessage();
+    }
+}
+
+
+        /* 处理匹配结果通知逻辑
 
         if (rideMatchResultDTO.getResultType().equals("Success")){
             String driverSessionId = "D" + rideMatchResultDTO.getDriverId();
@@ -163,8 +150,27 @@ public class NotificationService {
                 passengerMessage.put("accountType", "Carpooler");
 
                 passengerSession.getAsyncRemote().sendText(passengerMessage.toString());
-            }
-        }
-    }
+            }*/
 
-}
+
+    //Driver Message
+        /*
+        List<Long> passengersIds = rideMatchConfirmDTO.getCarpoolGroup().getPassengersIds();
+        List<String> wayPoints = new ArrayList<>();
+
+        for (Long passengerId : passengersIds){
+            wayPoints.add(carpoolerMapper.getOriginById(passengerId));
+            wayPoints.add(carpoolerMapper.getDestinationById(passengerId));
+        }
+
+        //TODO
+        String wayPointString;
+        for (String wayPoint : wayPoints){
+            wayPoint += "|";
+        }*/
+
+    /**
+     * parameters needed for ntf
+     * driver: origin & destination_name + passenger_name + matchId
+     * carpooler: plateNo + driver_name + car_type + seat_pax + matchId
+     */
