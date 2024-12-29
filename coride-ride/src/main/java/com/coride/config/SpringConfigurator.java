@@ -9,6 +9,7 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
 import java.util.List;
 import java.util.Map;
 
+//让 WebSocket 端点支持 Spring 的依赖注入
 public class SpringConfigurator extends Configurator {
 
     // Spring应用上下文持有器，用于在创建WebSocket端点实例时注入依赖

@@ -34,9 +34,9 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         try {
             log.info("jwt verification:{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-            Long empId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
-            log.info("id of current user：", empId);
-            BaseContext.setCurrentId(empId);
+            Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
+            log.info("id of current user：{}", userId);
+            BaseContext.setCurrentId(userId);
 
             return true;
         } catch (Exception ex) {

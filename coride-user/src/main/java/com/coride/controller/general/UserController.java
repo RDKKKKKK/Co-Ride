@@ -12,6 +12,7 @@ import com.coride.result.Result;
 import com.coride.service.general.EmailService;
 import com.coride.service.general.UserService;
 import com.coride.utils.JwtUtil;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +40,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @ApiOperation("User register account")
     public Result register(@RequestBody UserRegisterDTO userRegisterDTO){
         userService.register(userRegisterDTO);
         return Result.success(MessageConstant.REGISTERED_SUCCESSFULLY);
     }
 
     @PostMapping("/login")
-    @ApiOperation("User login")
     public Result<String> login(@RequestBody UserLoginDTO userLoginDTO){
         User user = userService.login(userLoginDTO);
 

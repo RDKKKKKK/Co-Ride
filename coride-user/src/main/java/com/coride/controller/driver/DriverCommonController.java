@@ -10,6 +10,7 @@ import com.coride.entity.Driver;
 import com.coride.entity.Vehicle;
 import com.coride.result.Result;
 import com.coride.service.driver.DriverCommonService;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

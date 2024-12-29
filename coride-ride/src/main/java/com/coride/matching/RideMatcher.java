@@ -15,22 +15,26 @@ import com.coride.mapper.DriverMapper;
 import com.coride.service.message.MessagingServiceTemplate;
 import com.github.xiaoymin.knife4j.core.util.StrUtil;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Service
+@Data
 @Slf4j
 public class RideMatcher {
 
@@ -49,6 +53,10 @@ public class RideMatcher {
     @Autowired
     private MessagingServiceTemplate messagingServiceTemplate;
 
+    @Autowired
+    @Qualifier("carpoolThreadPool") // 使用自定义的线程池
+    private ThreadPoolExecutor threadPool;
+
     @Transactional
     public void rideMatch(CarpoolGroup carpoolGroup) throws BaseException {
 
@@ -63,23 +71,32 @@ public class RideMatcher {
             stringRedisTemplate.opsForValue().set("cache:user:" + carpoolGroup.getIdDriver(), JSON.toJSONString(driver));
         }
 
+        Runnable task = new MatchingTask(driver, carpoolGroup, this, driverMapper, carpoolerMapper, threadPool, System.currentTimeMillis(), messagingServiceTemplate, redisTemplate);
+
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5); // 5个线程的线程池
+        /*
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        Runnable task = new MatchingTask(driver, carpoolGroup, this, driverMapper, carpoolerMapper, executor, System.currentTimeMillis(), messagingServiceTemplate, redisTemplate);
-        executor.scheduleAtFixedRate(task, 0, TimeConstant.executePeriod, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(task, 0, TimeConstant.executePeriod, TimeUnit.SECONDS); */
+
+        // TODO Keynote - Thread Pool
+        //threadPool.execute(task);
+        scheduler.scheduleAtFixedRate(task, 0, TimeConstant.executePeriod, TimeUnit.SECONDS);
+
 
     }
 
     @AllArgsConstructor
-    private static class MatchingTask implements Runnable {
+    @Data
+    public static class MatchingTask implements Runnable {
         private Driver driver;
         private CarpoolGroup carpoolGroup;
         private RideMatcher rideMatcher;
         private final DriverMapper driverMapper;
         private final CarpoolerMapper carpoolerMapper;
-        private final ScheduledExecutorService executor;
+        private final ExecutorService executor;
         private final Long startTime;
-        private final MessagingServiceTemplate messagingServiceTemplate;
-        private final RedisTemplate redisTemplate;
+        public final MessagingServiceTemplate messagingServiceTemplate;
+        public final RedisTemplate redisTemplate;
 
         @Override
         public void run() {
@@ -106,12 +123,12 @@ public class RideMatcher {
 
                 if (newPassenger != null) {
                     log.info("Match carpooler ID=: " + newPassenger.getIdUser());
-                    String matchID = UUID.randomUUID().toString();
+                    //String matchID = UUID.randomUUID().toString();
+                    String matchID = driver.getIdUser().toString() + "-" +newPassenger.getIdUser().toString();
 
                     redisTemplate.opsForValue().set("confirmation_state:" + matchID, new ConfirmationState(null, null, newPassenger.getIdUser(), driver.getIdUser()), 10, TimeUnit.MINUTES);
 
                     //confirmations.put(matchID, new ConfirmationState(null, null, newPassenger.getIdUser(), driver.getIdUser()));
-                    carpoolerMapper.updateCarpoolerStatus(newPassenger.getIdUser(), StatusConstant.PENDING);
 
                     matchIds.add(matchID);
                     driver.setMatchIds(matchIds);
@@ -129,60 +146,47 @@ public class RideMatcher {
                     ConfirmationState confirmationState = (ConfirmationState) redisTemplate.opsForValue().get("confirmation_state:" + matchId);
 
                     if (confirmationState.isConfirmedByBoth()) {
+                        //双方都同意 加入拼车组 删除状态变量
                         passengersIds.add(confirmationState.getPassengerId());
                         carpoolGroup.setPassengersIds(passengersIds);
                         carpoolGroup.setSeatsAvailable(carpoolGroup.getSeatsAvailable() - 1);
                         carpoolerMapper.updateCarpoolerStatus(confirmationState.getPassengerId(), StatusConstant.ACCEPTED);
                         carpoolerMapper.addToCarpoolGroup(confirmationState.getPassengerId(), carpoolGroup.getIdDriver());
 
-                        redisTemplate.delete("confirmation_state" + matchId);
-                        //confirmations.remove(matchId);
+                        redisTemplate.delete("confirmation_state:" + matchId);
                         iterator.remove();
                         driver.setMatchIds(matchIds);
                     } else if (confirmationState.isDeclined()) {
+                        //一方拒绝 通知拼车人 恢复状态继续匹配 司机端无操作
                         List<Long> failurePassengerId = new ArrayList<>();
                         failurePassengerId.add(confirmationState.getPassengerId());
 
                         //driverRideService.notifyCarpoolFailure(null, failurePassengerId, sessionMap);
-                        messagingServiceTemplate.sendMatchResultNotification(new RideMatchResultDTO("Carpooler", "Failure", null, failurePassengerId));
                         carpoolerMapper.updateCarpoolerStatus(confirmationState.getPassengerId(), StatusConstant.AVAILABLE);
-                        redisTemplate.delete("confirmation_state" + matchId);
+                        messagingServiceTemplate.sendMatchResultNotification(new RideMatchResultDTO("Carpooler", "Failure", null, failurePassengerId));
+                        redisTemplate.delete("confirmation_state:" + matchId);
                         iterator.remove();
                         driver.setMatchIds(matchIds);
                     }
                 }
 
                 if (carpoolGroup.getSeatsAvailable() == 0) {
-                    executor.shutdown();
-                    //driverRideService.notifyCarpoolSuccess(carpoolGroup.getDriverId(), passengersIds, sessionMap);
-                    messagingServiceTemplate.sendMatchResultNotification(new RideMatchResultDTO("Both", "Success", driver.getIdUser(), passengersIds));
+                    //成功：车已匹配满
+                    rideMatcher.carpoolGroupComplete(carpoolGroup, passengersIds, executor, driver);
 
-                    driverMapper.updateDriverStatus(StatusConstant.COMPLETED, carpoolGroup.getIdDriver());
-                    for (Long id : passengersIds) {
-                        carpoolerMapper.updateCarpoolerStatus(id, StatusConstant.COMPLETED);
-                    }
-                    driverMapper.insertCarpoolGroup(carpoolGroup);
-
-                 } else if ((currentTime - startTime) > TimeConstant.scheduledTime) {
+                } else if ((currentTime - startTime) > TimeConstant.scheduledTime) {
+                    //拼车组匹配超时
                     if (!carpoolGroup.getSeatsAvailable().equals(carpoolGroup.getTotalSeats())) {
-                        executor.shutdown();
-
-                        //driverRideService.notifyCarpoolSuccess(carpoolGroup.getDriverId(), passengersIds, sessionMap);
-                        messagingServiceTemplate.sendMatchResultNotification(new RideMatchResultDTO("Both", "Success", driver.getIdUser(), passengersIds));
-
-                        driverMapper.updateDriverStatus(StatusConstant.COMPLETED, carpoolGroup.getIdDriver());
-                        for (Long id : passengersIds) {
-                            carpoolerMapper.updateCarpoolerStatus(id, StatusConstant.COMPLETED);
-                        }
-
-                        driverMapper.insertCarpoolGroup(carpoolGroup);
+                        //成功：有人匹配
+                        rideMatcher.carpoolGroupComplete(carpoolGroup, passengersIds, executor, driver);
                     } else {
-                        executor.shutdown();
-
                         //driverRideService.notifyCarpoolFailure(carpoolGroup.getDriverId(), passengersIds, sessionMap);
+                        driverMapper.updateDriverStatus(StatusConstant.REJECTED, carpoolGroup.getIdDriver());
                         messagingServiceTemplate.sendMatchResultNotification(new RideMatchResultDTO("Both", "Failure", driver.getIdUser(), passengersIds));
 
-                        driverMapper.updateDriverStatus(StatusConstant.REJECTED, carpoolGroup.getIdDriver());
+                        //失败：无人匹配
+                        executor.shutdown();
+
                     }
                 }
             } catch (Exception e){
@@ -192,11 +196,35 @@ public class RideMatcher {
 
     }
 
+    //匹配和状态更新在同一个事务内，同时加行级写锁
+    @Transactional
     public Carpooler findMatch(CarpoolGroup carpoolGroup) {
         Integer orgId = carpoolerMapper.getIdOrganizationByUserId(carpoolGroup.getIdDriver());
         carpoolGroup.setIdOrganization(orgId);
         Long matchedId = carpoolerMapper.findBestMatchID(carpoolGroup);
-        return carpoolerMapper.findById(matchedId);
+        Carpooler newPassenger = carpoolerMapper.findById(matchedId);
+        if(newPassenger != null){
+            carpoolerMapper.updateCarpoolerStatus(newPassenger.getIdUser(), StatusConstant.PENDING);
+
+        }
+        return newPassenger;
+    }
+
+
+    @Transactional(
+            propagation = Propagation.REQUIRED,
+            isolation = Isolation.READ_COMMITTED,
+            rollbackFor = Exception.class)
+    public void carpoolGroupComplete(CarpoolGroup carpoolGroup, List<Long> passengersIds, ExecutorService executor, Driver driver){
+        executor.shutdown();
+        messagingServiceTemplate.sendMatchResultNotification(new RideMatchResultDTO("Both", "Success", driver.getIdUser(), passengersIds));
+
+        driverMapper.updateDriverStatus(StatusConstant.COMPLETED, carpoolGroup.getIdDriver());
+        for (Long id : passengersIds) {
+            carpoolerMapper.updateCarpoolerStatus(id, StatusConstant.COMPLETED);
+        }
+
+        driverMapper.insertCarpoolGroup(carpoolGroup);
     }
 
 

@@ -15,7 +15,7 @@ import java.util.List;
 
 @Mapper
 public interface CarpoolerMapper {
-    
+
     @Insert("insert into carpooler (idCarpooler) values (#{idUser})")
     void insert(User user);
 
@@ -41,12 +41,14 @@ public interface CarpoolerMapper {
     @Select("select * from user inner join carpooler c on user.idUser = c.idCarpooler where idUser = #{matchedId}")
     Carpooler findById(Long matchedId);
 
-    @Select("SELECT c.idCarpooler\n" +
-            "FROM carpool_request c\n" +
-            "WHERE c.status = 'Available' and c.idOrganization = #{idOrganization}\n" +
-            "ORDER BY ST_Distance_Sphere(c.originPoint, POINT(#{originLongitude}, #{originLatitude})) + \n" +
-            "         ST_Distance_Sphere(c.destinationPoint, POINT(#{destinationLongitude}, #{destinationLatitude}))\n" +
-            "ASC LIMIT 1 for update;")
+    @Select("SELECT c.idCarpooler " +
+            "FROM carpool_request c " +
+            "WHERE c.status = 'Available' AND c.idOrganization = #{idOrganization} " +
+            "AND ST_Distance_Sphere(c.originPoint, POINT(#{originLongitude}, #{originLatitude})) < 5000 " +
+            "AND ST_Distance_Sphere(c.destinationPoint, POINT(#{destinationLongitude}, #{destinationLatitude})) < 5000 " +
+            "ORDER BY ST_Distance_Sphere(c.originPoint, POINT(#{originLongitude}, #{originLatitude})) + " +
+            "         ST_Distance_Sphere(c.destinationPoint, POINT(#{destinationLongitude}, #{destinationLatitude})) " +
+            "ASC LIMIT 1 FOR UPDATE")
     Long findBestMatchID(CarpoolGroup carpoolGroup);
 
     @Update("update carpool_request set status = #{available} where status = 'Scheduled' and departureTime between #{now} and #{tenMinutesLater}")

@@ -18,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class Message {
     Role role;
+
     List<WebSocketObserver> observers = new ArrayList<>();
 
     public void addObserver(WebSocketObserver observer) {

@@ -178,22 +178,37 @@ public class DriverRideServiceImpl implements DriverRideService {
         ConfirmDTO confirmDTO = mapper.readValue(message, ConfirmDTO.class);
         String matchID = confirmDTO.getMatchId();
 
-        ConfirmationState confirmationState = (ConfirmationState) redisTemplate.opsForValue().get("confirmation_state:" + matchID);
-        //ConfirmationState confirmationState = confirmations.get(confirmDTO.getMatchId());
+        //TODO KeyNote - Redis分布式锁
+        //避免司机乘客同时获取数据进行修改 导致一方的结果被覆盖
+        //Redis原子操作所以用分布式锁 在MySQL里通过 REPEATABLE READ 隔离级别可解决
+        String lockKey = "lock:confirmation_state:" + confirmDTO.getMatchId();
+        Boolean isLocked = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", 5, TimeUnit.SECONDS);
 
-        switch (confirmDTO.getAccountType()){
-            case "Carpooler":
-                confirmationState.setPassengerConfirmed(confirmDTO.isConfirmed());
-                log.info("Carpooler ID="+confirmationState.getPassengerId()+" confirmed="+confirmDTO.isConfirmed());
-                break;
+        if (isLocked != null && isLocked) {
+            try {
+                // 获取并修改状态
+                ConfirmationState confirmationState = (ConfirmationState) redisTemplate.opsForValue().get("confirmation_state:" + matchID);
 
-            case "Driver":
-                confirmationState.setDriverConfirmed(confirmDTO.isConfirmed());
-                log.info("Driver ID="+confirmationState.getDriverId()+" confirmed="+confirmDTO.isConfirmed());
-                break;
+                switch (confirmDTO.getAccountType()){
+                    case "Carpooler":
+                        confirmationState.setPassengerConfirmed(confirmDTO.isConfirmed());
+                        log.info("Carpooler ID="+confirmationState.getPassengerId()+" confirmed="+confirmDTO.isConfirmed());
+                        break;
+
+                    case "Driver":
+                        confirmationState.setDriverConfirmed(confirmDTO.isConfirmed());
+                        log.info("Driver ID="+confirmationState.getDriverId()+" confirmed="+confirmDTO.isConfirmed());
+                        break;
+                }
+
+                redisTemplate.opsForValue().set("confirmation_state:" + matchID, confirmationState, 10, TimeUnit.MINUTES);
+          } finally {
+                // 释放锁
+                redisTemplate.delete(lockKey);
+            }
+        } else {
+            throw new RuntimeException("Another process is modifying the state");
         }
-
-        redisTemplate.opsForValue().set("confirmation_state:" + matchID, confirmationState, 10, TimeUnit.MINUTES);
 
     }
 

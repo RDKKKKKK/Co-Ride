@@ -42,25 +42,6 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/user/register", "/user/login", "/request/**", "/user/email");
     }
 
-    /**
-     * 通过knife4j生成接口文档
-     * @return
-     */
-    @Bean
-    public Docket docket() {
-        log.info("Generating Interface Document");
-        ApiInfo apiInfo = new ApiInfoBuilder()
-                .title("Team Carpool App - Interface Document")
-                .version("0.0")
-                .build();
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.carpool.controller"))
-                .paths(PathSelectors.any())
-                .build();
-        return docket;
-    }
 
     /**
      * 设置静态资源映射

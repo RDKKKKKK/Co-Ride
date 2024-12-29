@@ -1,11 +1,71 @@
 coride:
+  server:
+    port: 8081
+
+  spring:
+    profiles:
+      active: local
+    main:
+      allow-circular-references: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    host: 192.168.168.130
+    host: localhost
     port: 3306
-    database: coride_app
+    database: coride
     username: root
-    password: 123456
+    password: Yy141550
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        min-idle: 0
+        max-idle: 8
+        max-wait: -1
+  nacos:
+    discovery:
+      server-addr: localhost:8848
+      service: ride-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    virtual-host: /
+    username: guest
+    password: guest
+
+  mail:
+    host: smtp.163.com
+    username: rdk1606@163.com
+    password: UAAHSMYULMXQDMWC
+    default-encoding: UTF-8
+    protocol: smtp
+    smtp:
+      auth: true
+      starttls:
+        enabled: true
+        required: true
+  mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    type-aliases-package: com.carpool.entity
+    map-underscore-to-camel-case: true
+  logging:
+    level:
+      mapper: DEBUG
+      service: DEBUG
+      controller: DEBUG
+
+  jwt:
+    admin-secret-key: coride
+    admin-ttl: 7200000
+    admin-token-name: token
+    excludedPath:
+      - /user/login
+      - /user/register
+      - /user/email
+      - /request
 
   alioss:
     endpoint: oss-cn-beijing.aliyuncs.com
@@ -13,20 +73,13 @@ coride:
     access-key-secret: pv5elRC1qAyTrrYr3RC6PSjCD2vnIa
     bucket-name: sky-test-0
 
-  redis:
-    host: 192.168.168.130
-    port: 6379
-    password: 123456
-    database: 10
-    lettuce:
-      pool:
-        max-active: 8
-        min-idle: 0
-        max-idle: 8
-        max-wait: 100
+  threadpool:
+    corePoolSize: 5             # 核心线程数
+    maxPoolSize: 20             # 最大线程数
+    queueCapacity: 100          # 阻塞队列容量
+    keepAliveTime: 30           # 非核心线程存活时间（秒）
 
-  rabbitmq:
-    host: 192.168.168.130
+
 
 
 

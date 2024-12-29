@@ -38,8 +38,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     protected void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/user/register", "/user/login", "/request/**", "/user/email");
+                .addPathPatterns("/user/**","/driver/**","carpooler/**")
+                .excludePathPatterns("/doc.html","/swagger-ui.html","/user/register", "/user/login", "/request/**", "/user/email");
     }
 
     /**
@@ -48,15 +48,15 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      */
     @Bean
     public Docket docket() {
-        log.info("Generating Interface Document");
+        log.info("Generating Interface Document - User Service");
         ApiInfo apiInfo = new ApiInfoBuilder()
-                .title("Team Carpool App - Interface Document")
+                .title("Co-Ride Interface Document: user-service")
                 .version("0.0")
                 .build();
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.carpool.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.coride.controller"))
                 .paths(PathSelectors.any())
                 .build();
         return docket;

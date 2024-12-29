@@ -1,11 +1,11 @@
 server:
-  port: 8081
+  port: ${coride.server.port}
 
 spring:
   profiles:
-    active: local
+    active: ${coride.spring.profiles.active}
   main:
-    allow-circular-references: true
+    allow-circular-references: ${coride.spring.main.allow-circular-references}
   datasource:
     druid:
       driver-class-name: ${coride.datasource.driver-class-name}
@@ -27,56 +27,46 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.168.130:8848
-        service: notification-service
+        server-addr: ${coride.nacos.discovery.server-addr}
+        service: ${coride.nacos.discovery.service}
 
   rabbitmq:
     host: ${coride.rabbitmq.host}
-    port: 5672
-    virtual-host: /
-    username: root
-    password: 123456
+    port: ${coride.rabbitmq.port}
+    virtual-host: ${coride.rabbitmq.virtual-host}
+    username: ${coride.rabbitmq.username}
+    password: ${coride.rabbitmq.password}
 
   mail:
-    host: smtp.163.com
-    username: rdk1606@163.com
-    password: UAAHSMYULMXQDMWC
-    default-encoding: UTF-8
-    protocol: smtp
+    host: ${coride.mail.host}
+    username: ${coride.mail.username}
+    password: ${coride.mail.password}
+    default-encoding: ${coride.mail.default-encoding}
+    protocol: ${coride.mail.protocol}
     properties:
       mail:
         smtp:
-          auth: true # 启用SMTP认证
+          auth: ${coride.mail.smtp.auth}
           starttls:
-            enabled: true # 启用SMTP认证
-            required: true # 必须采用加密链接
+            enabled: ${coride.mail.smtp.starttls.enabled}
+            required: ${coride.mail.smtp.starttls.required}
 
 mybatis:
-  #mapper配置文件
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.carpool.entity
+  mapper-locations: ${coride.mybatis.mapper-locations}
+  type-aliases-package: ${coride.mybatis.type-aliases-package}
   configuration:
-    #开启驼峰命名
-    map-underscore-to-camel-case: true
+    map-underscore-to-camel-case: ${coride.mybatis.map-underscore-to-camel-case}
 
-logging:
-  level:
-    com:
-      coride:
-        mapper: debug
-        service: info
-        controller: info
 
 coride:
   jwt:
-    # 设置jwt签名加密时使用的秘钥
-    admin-secret-key: coride
-    # 设置jwt过期时间
-    admin-ttl: 7200000
-    # 设置前端传递过来的令牌名称
-    admin-token-name: token
+    admin-secret-key: ${coride.jwt.admin-secret-key}
+    admin-ttl: ${coride.jwt.admin-ttl}
+    admin-token-name: ${coride.jwt.admin-token-name}
+    excludedPath: ${coride.jwt.excludedPath}
 
-springfox:
-  documentation:
-    enabled: false
-
+  alioss:
+    endpoint: ${coride.alioss.endpoint}
+    access-key-id: ${coride.alioss.access-key-id}
+    access-key-secret: ${coride.alioss.access-key-secret}
+    bucket-name: ${coride.alioss.bucket-name}

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Date;
 import java.util.List;
 
-@FeignClient("ride-service")
+@FeignClient(value = "ride-service", url = "ride-service:8081")
 public interface RideClient {
 
     @PostMapping("/carpooler/ride/record")

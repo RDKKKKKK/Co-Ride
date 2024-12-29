@@ -5,7 +5,7 @@ spring:
     name: gateway
   cloud:
     nacos:
-      server-addr: 192.168.168.130:8848
+      server-addr: localhost:8848
     gateway:
       routes:
         - id: user # 路由规则id，自定义，唯一
