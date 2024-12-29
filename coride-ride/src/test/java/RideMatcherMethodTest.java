@@ -96,7 +96,7 @@ class RideMatcherMethodTest {
         carpoolGroup.setPassengersIds(passengerIds);
 
         // 调用被测方法
-        rideMatcher.carpoolGroupComplete(carpoolGroup, passengerIds, mock(ScheduledExecutorService.class), driver);
+        rideMatcher.carpoolGroupComplete(carpoolGroup, passengerIds, driver);
 
         // 验证发送通知的方法被调用一次
         verify(messagingServiceTemplate, times(1)).sendMatchResultNotification(any(RideMatchResultDTO.class));

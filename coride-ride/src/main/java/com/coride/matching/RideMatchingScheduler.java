@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 /**
@@ -44,14 +45,18 @@ public class RideMatchingScheduler {
         // 计算10分钟之前的时间
         LocalDateTime tenMinutesLater = now.plusMinutes(10);
 
-        CarpoolGroup carpoolGroup = driverMapper.findAvailableCarpoolGroup(now, tenMinutesLater);
+        List<CarpoolGroup> carpoolGroups = driverMapper.findAvailableCarpoolGroup(now, tenMinutesLater);
 
-        if (carpoolGroup != null){
-            driverMapper.updateDriverStatus(StatusConstant.AVAILABLE, carpoolGroup.getIdDriver());
-            rideMatcher.rideMatch(carpoolGroup);
+        if (!carpoolGroups.isEmpty()){
+            for (CarpoolGroup carpoolGroup : carpoolGroups) {
+                driverMapper.updateDriverStatus(StatusConstant.AVAILABLE, carpoolGroup.getIdDriver());
+                rideMatcher.rideMatch(carpoolGroup);
+            }
         }
 
         carpoolerMapper.refreshAllStatus(now, tenMinutesLater, StatusConstant.AVAILABLE);
+        rideMatcher.logCurrentMatchingStatus();
+
 
     }
 }

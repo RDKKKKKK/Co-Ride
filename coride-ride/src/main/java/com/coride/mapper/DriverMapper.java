@@ -40,8 +40,8 @@ public interface DriverMapper {
     @Update("update carpool_group set status = #{status} where idDriver = #{id} and status != 'Cancelled' order by departureTime desc limit 1")
     void updateDriverStatus(String status, Long id);
 
-    @Select("select * from carpool_group where status = 'Scheduled' and departureTime between #{now} and #{tenMinutesLater} order by departureTime desc limit 1")
-    CarpoolGroup findAvailableCarpoolGroup(LocalDateTime now, LocalDateTime tenMinutesLater);
+    @Select("select * from carpool_group where status = 'Scheduled' and departureTime between #{now} and #{tenMinutesLater} order by departureTime")
+    List<CarpoolGroup> findAvailableCarpoolGroup(LocalDateTime now, LocalDateTime tenMinutesLater);
 
     @Select("select * from user u inner join driver d on u.idUser = d.idDriver where idUser = #{id}")
     Driver getDriverAccountById(Long id);

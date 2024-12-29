@@ -3,6 +3,7 @@ import com.coride.dto.RideMatchResultDTO;
 import com.coride.entity.*;
 import com.coride.mapper.CarpoolerMapper;
 import com.coride.mapper.DriverMapper;
+import com.coride.matching.MatchingTask;
 import com.coride.matching.RideMatcher;
 import com.coride.service.message.MessagingServiceTemplate;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,7 @@ public class RideMatcherThreadTest {
 
     private Driver mockDriver;
     private CarpoolGroup mockCarpoolGroup;
-    private RideMatcher.MatchingTask matchingTask;
+    private MatchingTask matchingTask;
 
 
     @BeforeEach
@@ -62,13 +63,12 @@ public class RideMatcherThreadTest {
         mockCarpoolGroup.setSeatsAvailable(3);
         mockCarpoolGroup.setTotalSeats(3);
 
-        matchingTask = new RideMatcher.MatchingTask(
+        matchingTask = new MatchingTask(
                 mockDriver,
                 mockCarpoolGroup,
                 rideMatcher,
                 driverMapper,
                 carpoolerMapper,
-                executor,
                 System.currentTimeMillis() - 26000L,
                 messagingServiceTemplate,
                 redisTemplate

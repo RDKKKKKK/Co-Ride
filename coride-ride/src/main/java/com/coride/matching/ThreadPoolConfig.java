@@ -1,13 +1,10 @@
-package com.coride.config;
+package com.coride.matching;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
@@ -32,11 +29,40 @@ public class ThreadPoolConfig {
                 maxPoolSize,
                 keepAliveTime,
                 TimeUnit.SECONDS,
+                new PriorityBlockingQueue<>(), // 自定义优先级阻塞队列
+                new CustomThreadFactory("Carpool-Thread"), // 自定义线程工厂
+                new ThreadPoolExecutor.CallerRunsPolicy()  // 饱和策略
+        ){
+            @Override
+            protected void beforeExecute(Thread t, Runnable r) {
+                super.beforeExecute(t, r);
+                System.out.println("Thread " + t.getName() + " is about to execute.");
+            }
+
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                if (t != null) {
+                    System.err.println("Thread execution error: " + t.getMessage());
+                }
+            }
+        };
+    }
+
+    /*
+
+    @Bean(name = "carpoolThreadPool")
+    public ThreadPoolExecutor carpoolThreadPool() {
+        return new ThreadPoolExecutor(
+                corePoolSize,
+                maxPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(queueCapacity), // 无界队列，任务量大但不确定
                 new CustomThreadFactory("Carpool-Thread"), // 使用自定义线程工厂
                 new ThreadPoolExecutor.CallerRunsPolicy() // 饱和策略
         );
-    }
+    }*/
 
 
     public static class CustomThreadFactory implements ThreadFactory {
