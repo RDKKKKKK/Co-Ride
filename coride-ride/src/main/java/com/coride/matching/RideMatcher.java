@@ -75,13 +75,14 @@ public class RideMatcher {
 
         Runnable task = new MatchingTask(driver, carpoolGroup, this, driverMapper, carpoolerMapper, System.currentTimeMillis(), messagingServiceTemplate, redisTemplate);
 
+        // TODO Keynote - Thread Pool
+        scheduler.execute(task);
+
         /*
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5); // 5个线程的线程池
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(task, 0, TimeConstant.executePeriod, TimeUnit.SECONDS); */
 
-        // TODO Keynote - Thread Pool
-        scheduler.execute(task);
         //scheduler.scheduleAtFixedRate(task, 0, TimeConstant.executePeriod, TimeUnit.SECONDS);
     }
 
