@@ -33,3 +33,26 @@ This repository contains the codebase for a **RideSharing Platform**, a microser
     - **Gateway Services**
     - **Notification Service**
     
+
+
+
+
+### Appendix
+- JWT
+
+客户端携带 Token（放在配置指定的请求头）
+
+
+↓
+
+
+JwtTokenAdminInterceptor.preHandle():
+读取请求头 → 解析 Token（HS256 + 配置密钥）→ 获取 Claims
+从 Claims 取 user_id → BaseContext.setCurrentId(userId)
+
+
+↓
+
+
+控制器与服务层：
+随处通过 BaseContext.getCurrentId() 获取当前用户

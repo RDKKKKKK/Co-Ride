@@ -23,7 +23,7 @@ services:
       - app_network
 
   nacos:
-    image: nacos/nacos-server:latest
+    image: nacos/nacos-server:2.0.2
     container_name: nacos
     environment:
       MODE: standalone
@@ -33,11 +33,28 @@ services:
       MYSQL_SERVICE_PORT: 3306
       MYSQL_SERVICE_DB_NAME: nacos_config
       MYSQL_SERVICE_USER: root
-      MYSQL_SERVICE_PASSWORD: Yy141550
+      MYSQL_SERVICE_PASSWORD: root123
     ports:
       - "8848:8848"
     networks:
       - app_network
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123    # root 用户密码（你可以改）
+      MYSQL_DATABASE: nacos_config    # 启动时自动建库
+      MYSQL_USER: nacos               # 额外创建的 nacos 用户
+      MYSQL_PASSWORD: nacos123        # nacos 用户密码
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql       # 持久化数据
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    command:
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
 
 networks:
   app_network:

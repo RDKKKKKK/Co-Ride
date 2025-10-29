@@ -78,8 +78,8 @@ coride:
     access-key-secret: ${coride.alioss.access-key-secret}
     bucket-name: ${coride.alioss.bucket-name}
 
-  threadpool:
-    corePoolSize: ${coride.threadpool.corePoolSize:5}         # 核心线程数，默认值为5
-    maxPoolSize: ${coride.threadpool.maxPoolSize:20}         # 最大线程数，默认值为20
-    queueCapacity: ${coride.threadpool.queueCapacity:100}    # 阻塞队列容量，默认值为100
-    keepAliveTime: ${coride.threadpool.keepAliveTime:30}     # 非核心线程存活时间（秒），默认值为30
+threadpool:
+  corePoolSize: ${coride.threadpool.corePoolSize:5}         # 核心线程数，默认值为5
+  maxPoolSize: ${coride.threadpool.maxPoolSize:20}         # 最大线程数，默认值为20
+  queueCapacity: ${coride.threadpool.queueCapacity:100}    # 阻塞队列容量，默认值为100
+  keepAliveTime: ${coride.threadpool.keepAliveTime:30}     # 非核心线程存活时间（秒），默认值为30

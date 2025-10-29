@@ -75,7 +75,6 @@ public class RideMatcher {
 
         Runnable task = new MatchingTask(driver, carpoolGroup, this, driverMapper, carpoolerMapper, System.currentTimeMillis(), messagingServiceTemplate, redisTemplate);
 
-        // TODO Keynote - Thread Pool
         scheduler.execute(task);
 
         /*

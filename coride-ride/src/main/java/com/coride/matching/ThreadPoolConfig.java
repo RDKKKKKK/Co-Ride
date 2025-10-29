@@ -77,7 +77,7 @@ public class ThreadPoolConfig {
         public Thread newThread(Runnable r) {
             Thread thread = new Thread(r, threadNamePrefix + "-" + threadCount.getAndIncrement());
             thread.setDaemon(false); // 是否为守护线程
-            thread.setPriority(Thread.NORM_PRIORITY); // 设置线程优先级
+            thread.setPriority(Thread.NORM_PRIORITY); // 设置线程优先级 （定义在matchingTask：departureTime早的）
             thread.setUncaughtExceptionHandler((t, e) ->
                     System.err.println("Uncaught exception in thread " + t.getName() + ": " + e.getMessage())
             );

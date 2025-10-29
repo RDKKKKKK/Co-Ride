@@ -3,9 +3,12 @@ server:
 
 spring:
   profiles:
-    active: ${coride.spring.profiles.active}
+    active: local
   main:
-    allow-circular-references: ${coride.spring.main.allow-circular-references}
+    allow-circular-references: true  # 直接写
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
   datasource:
     druid:
       driver-class-name: ${coride.datasource.driver-class-name}

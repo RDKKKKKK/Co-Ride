@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Data
 @Slf4j
 public class MatchingTask implements Runnable,  Comparable<MatchingTask> {
+
     private Driver driver;
     private CarpoolGroup carpoolGroup;
     private RideMatcher rideMatcher;

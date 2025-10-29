@@ -14,8 +14,13 @@
  Date: 03/12/2024 17:01:48
 */
 
+use coride;
+
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+
 
 -- ----------------------------
 -- Table structure for address

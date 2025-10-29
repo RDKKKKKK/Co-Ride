@@ -15,6 +15,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class NotificationServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(NotificationServiceApp.class, args);
-        log.info("User service server started");
+        log.info("Notify service server started");
     }
 }

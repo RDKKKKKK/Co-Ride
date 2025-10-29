@@ -1,12 +1,13 @@
 coride:
   server:
-    port: 8082
+    port: 8083
 
   spring:
     profiles:
       active: local
     main:
       allow-circular-references: true
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
@@ -28,7 +29,7 @@ coride:
   nacos:
     discovery:
       server-addr: localhost:8848
-      service: user-service
+      service: notification-service
   rabbitmq:
     host: localhost
     port: 5672
@@ -65,12 +66,6 @@ coride:
       - /user/register
       - /user/email
       - /request
-
-  alioss:
-    endpoint: oss-cn-beijing.aliyuncs.com
-    access-key-id: LTAI5tNKfWezmdM9FSR8oHcH
-    access-key-secret: pv5elRC1qAyTrrYr3RC6PSjCD2vnIa
-    bucket-name: sky-test-0
 
 
 
